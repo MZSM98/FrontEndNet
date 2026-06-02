@@ -1,38 +1,28 @@
 @model AuthUser
 @{
-    ViewData["Title"] = "Perfil de usuario";
-    ViewData["SubTitle"] = "Perfil";
+    ViewData["Title"] = "Mi Perfil";
 }
 
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb small">
-        <li class="breadcrumb-item active" aria-current="page">@ViewData["SubTitle"]</li>
-    </ol>
-</nav>
+<h2 class="text-center mb-4 mt-3">@ViewData["Title"]</h2>
 
-<h2 class="text-center mb-3">@ViewData["Title"]</h2>
+<div class="card mt-3 shadow-sm mx-auto" style="max-width: 500px;">
+    <div class="card-body p-4">
+        
+        <div class="mb-4 border-bottom pb-3">
+            <label asp-for="Email" class="form-label fw-bold text-muted mb-0"></label>
+            <div class="form-text text-body fs-6 mt-1">@Model.Email</div>
+        </div>
+        
+        <div class="mb-5">
+            <label asp-for="Nombre" class="form-label fw-bold text-muted mb-0"></label>
+            <div class="form-text text-body fs-6 mt-1">@Model.Nombre</div>
+        </div>
+        
+        <div class="d-grid gap-2">
+            <a asp-controller="Pedidos" asp-action="Index" class="btn btn-primary btn-lg">
+                Ver mis pedidos
+            </a>
+        </div>
 
-<div class="card mt-3">
-    <div class="card-body">
-        <div class="mb-3 ps-3">
-            <label asp-for="Email" class="form-label form-text"></label>
-            <div class="form-text text-body">@Model.Email</div>
-        </div>
-        <div class="mb-3 ps-3">
-            <label asp-for="Nombre" class="form-label form-text"></label>
-            <div class="form-text text-body">@Model.Nombre</div>
-        </div>
-        <div class="mb-3 ps-3">
-            <label asp-for="Rol" class="form-label form-text"></label>
-            <div class="form-text text-body">@Model.Rol</div>
-        </div>
-        <div class="mb-3 ps-3 small">
-            <label asp-for="Jwt" class="form-label form-text"></label>
-            <div class="form-text text-body">@Model.Jwt</div>
-        </div>
-        <div class="mb-3 ps-3">
-            <label class="form-label form-text">Tiempo restante</label>
-            <div class="form-text text-body">@ViewBag.timeRemaining</div>
-        </div>
     </div>
 </div>

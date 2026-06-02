@@ -50,7 +50,7 @@ public class AuthController(AuthClientService auth) : Controller
         return View(model);
     }
 
-    [Authorize(Roles = "Administrador, Usuario")]
+    [Authorize]
     public async Task<IActionResult> SalirAsync()
     {
         // Cierra la sesión
@@ -95,9 +95,9 @@ public class AuthController(AuthClientService auth) : Controller
                 // 3. Redirige a la página principal ya autenticado
                 return RedirectToAction("Index", "Home");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                ModelState.AddModelError("Email", "No ha sido posible registrar la cuenta. Es posible que el correo ya esté en uso.");
+                ModelState.AddModelError("Email", $"Error del servidor: {ex.Message}");
             }
         }
         return View("Registrar", model);

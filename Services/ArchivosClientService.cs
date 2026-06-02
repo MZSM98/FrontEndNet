@@ -54,4 +54,14 @@ public class ArchivosClientService(HttpClient client)
         var response = await client.DeleteAsync($"api/archivos/{id}");
         response.EnsureSuccessStatusCode();
     }
+
+    public async Task<Stream?> GetImagenAsync(int id)
+    {
+        var response = await client.GetAsync($"api/archivos/{id}");
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadAsStreamAsync();
+        }
+        return null;
+    }
 }

@@ -6,7 +6,7 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script src="~/js/producto_portada.js"></script>
+    <script src="~/js/producto_portada.js" asp-append-version="true"></script>
 }
 
 <nav aria-label="breadcrumb">
@@ -24,8 +24,9 @@
     <div class="card mt-3">
         <div class="row g-0">
             <div class="col-md-4">
-                <img src="https://via.placeholder.com/300x450" alt="Nueva película" data-url="@ViewBag.Url"
-                     class="portada img-fluid img-thumbnail mt-2 ms-2" style="max-height: 300px;">
+                <img src="https://dummyimage.com/300x450/cccccc/000000.png&text=Sin+Portada" alt="Nueva película" 
+                    data-url="@Url.Action("Imagen", "Archivos")"
+                    class="portada img-fluid img-thumbnail mt-2 ms-2" style="max-height: 300px;">
             </div>
             <div class="col-md-8">
                 <div class="card-body small">

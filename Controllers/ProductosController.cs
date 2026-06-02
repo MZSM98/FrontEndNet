@@ -20,11 +20,16 @@ public class ProductosController(ProductosClientService productos,
         {
             lista = await productos.GetAsync(s);
         }
-        catch (HttpRequestException ex)
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction("Salir", "Auth");
+            return RedirectToAction("Salir", "Auth");
         }
+        catch (Exception ex)
+        {
+            // Atrapamos el error de lectura silencioso para que puedas verlo
+            ViewBag.ErrorMessage = "No se pudieron cargar los productos: " + ex.Message;
+        }
+
         if (User.FindFirstValue(ClaimTypes.Role) == "Administrador")
             ViewBag.SoloAdmin = true;
 
@@ -32,7 +37,6 @@ public class ProductosController(ProductosClientService productos,
         ViewBag.search = s;
         return View(lista);
     }
-
     public async Task<IActionResult> Detalle(int id)
     {
         Producto? item = null;

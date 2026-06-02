@@ -1,12 +1,15 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace frontendnet.Models;
 
 public class Rol
 {
-    public required string Id { get; set; }
+    [Display(Name = "Id")]
+    [JsonPropertyName("id")] 
+    public int? Id { get; set; } 
 
-    [Required(ErrorMessage = "El campo {0} es obligatorio.")]
-    [Display(Name = "Rol")]
-    public required string Nombre { get; set; }
+    [Display(Name = "Nombre")]
+    [JsonPropertyName("nombre")]
+    public string? Nombre { get; set; }
 }

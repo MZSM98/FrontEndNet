@@ -176,4 +176,14 @@ public class ArchivosController(ArchivosClientService archivos, IConfiguration c
         }
         return RedirectToAction(nameof(Eliminar), new { id, showError = true });
     }
+
+    [AllowAnonymous]
+    public async Task<IActionResult> Imagen(int id)
+    {
+        var stream = await archivos.GetImagenAsync(id);
+        if (stream == null) return NotFound();
+        
+        // Devolvemos el archivo binario directamente al navegador
+        return File(stream, "image/jpeg"); 
+    }
 }

@@ -71,8 +71,8 @@
                             @Html.DisplayFor(modelItem => item.ProductoId)
                         </td>
                         <td class="text-center" width="1">
-                            <img src="@((item.ArchivoId == null) ? "https://via.placeholder.com/27x40" : $"{ViewBag.Url}/api/archivos/{item.ArchivoId}")"
-                                 alt="@item.Titulo" class="img-fluid img-thumbnail" style="max-height: 40px;">
+                            <img src="@((item.ArchivoId == null) ? "https://dummyimage.com/27x40/cccccc/000000.png&text=+" : Url.Action("Imagen", "Archivos", new { id = item.ArchivoId }))"
+                             alt="@item.Titulo" class="img-fluid img-thumbnail" style="max-height: 40px;">
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.Titulo)<br />

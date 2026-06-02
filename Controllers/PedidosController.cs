@@ -22,15 +22,21 @@ public class PedidosController(PedidosClientService pedidos, IConfiguration conf
             }
             else
             {
-                // El backend espera un ID, enviamos el claim de NameIdentifier u otro que uses para el Cliente
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0";
-                lista = await pedidos.GetClienteAsync(userId); // Llama a getAllDelCliente()
+                // Cambiamos a ClaimTypes.Name porque nuestro identificador real es el Email
+                var userEmail = User.FindFirstValue(ClaimTypes.Name) ?? "";
+                
+                // Llama a getAllDelCliente() usando el correo
+                lista = await pedidos.GetClienteAsync(userEmail); 
             }
         }
         catch (HttpRequestException ex)
         {
             if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 return RedirectToAction("Salir", "Auth");
+                
+            // Si el cliente aún no tiene pedidos y el backend arroja 404, mostramos la lista vacía
+            if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+                return View(lista);
         }
 
         ViewBag.Url = configuration["UrlWebAPI"];
