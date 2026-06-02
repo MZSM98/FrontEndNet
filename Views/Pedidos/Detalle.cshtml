@@ -1,0 +1,119 @@
+@model frontendnet.Models.DetallePedido
+
+@{
+    ViewData["Title"] = "Detalle del Pedido #" + Model.PedidoId;
+    bool soloAdmin = ViewBag.SoloAdmin ?? false;
+}
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>@ViewData["Title"]</h2>
+        <a asp-action="Index" class="btn btn-secondary">Volver a la lista</a>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="card-title mb-0">Resumen del Pedido</h5>
+                </div>
+                <div class="card-body">
+                    <p>
+                        <strong>Estado:</strong> 
+                        <span class="badge @(Model.Estado == "entregado" ? "bg-success" : 
+                                             Model.Estado == "cancelado" ? "bg-danger" : 
+                                             Model.Estado == "pendiente" ? "bg-warning text-dark" : "bg-info")">
+                            @Model.Estado
+                        </span>
+                    </p>
+                    <p><strong>Total del Pedido:</strong> <span class="text-success fw-bold fs-5">@Html.DisplayFor(model => model.Total)</span></p>
+                    <p class="text-muted small"><strong>Última modificación:</strong> @Model.UpdatedAt.ToString("g")</p>
+
+                    @if (soloAdmin && Model.Estado != "entregado" && Model.Estado != "cancelado")
+                    {
+                        <hr />
+                        <h6 class="fw-bold mb-2">Acciones Administrativas</h6>
+                        <form asp-action="ActualizarEstado" asp-route-id="@Model.PedidoId" method="post">
+                            <div class="mb-3">
+                                <label class="form-label small text-muted">Avanzar al siguiente estado:</label>
+                                <select name="nuevoEstado" class="form-select form-select-sm" required>
+                                    <option value="">Seleccione una opción...</option>
+                                    @if (Model.Estado == "pendiente")
+                                    {
+                                        <option value="aprobado">Aprobar Pedido</option>
+                                    }
+                                    @if (Model.Estado == "aprobado")
+                                    {
+                                        <option value="enviado">Marcar como Enviado</option>
+                                    }
+                                    @if (Model.Estado == "enviado")
+                                    {
+                                        <option value="entregado">Marcar como Entregado</option>
+                                    }
+                                    <option value="cancelado">Cancelar Pedido</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-dark w-100">Aplicar Transición</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0">Artículos del Pedido</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 90px;" class="text-center">Portada</th>
+                                    <th>Producto</th>
+                                    <th class="text-end">Precio</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var producto in Model.Productos)
+                                {
+                                    decimal subtotal = producto.PrecioVenta * producto.Cantidad;
+                                    <tr>
+                                        <td class="text-center">
+                                            @if (producto.ArchivoId.HasValue)
+                                            {
+                                                <img src="@ViewBag.Url/api/archivos/@producto.ArchivoId" class="img-thumbnail" style="max-height: 55px; max-width: 55px; object-fit: cover;" alt="Portada" />
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted style="font-size: 0.75rem;">N/A</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="fw-bold d-block">@producto.Titulo</span>
+                                            <small class="text-muted">Código: @producto.Id</small>
+                                        </td>
+                                        <td class="text-end">@producto.PrecioVenta.ToString("C")</td>
+                                        <td class="text-center">@producto.Cantidad</td>
+                                        <td class="text-end fw-bold">@subtotal.ToString("C")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
