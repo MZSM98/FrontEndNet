@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace frontendnet.Controllers;
 
-[Authorize] // Permite acceso tanto a Administrador como a Cliente
+[Authorize(Roles = "Administrador")] 
 public class PedidosController(PedidosClientService pedidos, IConfiguration configuration) : Controller
 {
     public async Task<IActionResult> Index()
@@ -14,29 +14,17 @@ public class PedidosController(PedidosClientService pedidos, IConfiguration conf
         List<Pedido>? lista = [];
         try
         {
-            var rol = User.FindFirstValue(ClaimTypes.Role);
-            if (rol == "Administrador")
-            {
-                ViewBag.SoloAdmin = true;
-                lista = await pedidos.GetAsync(); // Llama a getAll() del backend
-            }
-            else
-            {
-                // Cambiamos a ClaimTypes.Name porque nuestro identificador real es el Email
-                var userEmail = User.FindFirstValue(ClaimTypes.Name) ?? "";
-                
-                // Llama a getAllDelCliente() usando el correo
-                lista = await pedidos.GetClienteAsync(userEmail); 
-            }
+            ViewBag.SoloAdmin = true;
+            lista = await pedidos.GetAsync();
         }
-        catch (HttpRequestException ex)
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction("Salir", "Auth");
-                
-            // Si el cliente aún no tiene pedidos y el backend arroja 404, mostramos la lista vacía
-            if (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-                return View(lista);
+            return RedirectToAction("Salir", "Auth");
+        }
+        catch (Exception ex)
+        {
+            // Si algo falla, atrapamos el error y lo mandamos a la vista
+            ViewBag.ErrorMessage = "No se pudieron cargar los pedidos. Detalle: " + ex.Message;
         }
 
         ViewBag.Url = configuration["UrlWebAPI"];
@@ -49,32 +37,22 @@ public class PedidosController(PedidosClientService pedidos, IConfiguration conf
         ViewBag.Url = configuration["UrlWebAPI"];
         try
         {
-            var rol = User.FindFirstValue(ClaimTypes.Role);
-            if (rol == "Administrador")
-            {
-                ViewBag.SoloAdmin = true;
-                detalle = await pedidos.GetDetalleAsync(id); // Admin
-            }
-            else
-            {
-                detalle = await pedidos.GetDetalleClienteAsync(id); // Cliente
-            }
-            
+            ViewBag.SoloAdmin = true;
+            detalle = await pedidos.GetDetalleAsync(id);
             if (detalle == null) return NotFound();
         }
-        catch (HttpRequestException ex)
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction("Salir", "Auth");
-                
-            if (ex.StatusCode == System.Net.HttpStatusCode.NotFound || ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
-                return NotFound();
+            return RedirectToAction("Salir", "Auth");
+        }
+        catch (Exception ex)
+        {
+            ViewBag.ErrorMessage = "No se pudo cargar el detalle. Detalle: " + ex.Message;
         }
         return View(detalle);
     }
 
     [HttpPost]
-    [Authorize(Roles = "Administrador")] // Solo el admin puede cambiar el estado, tal como en tu pedido_routes.ts
     public async Task<IActionResult> ActualizarEstado(int id, string nuevoEstado)
     {
         try
@@ -87,7 +65,6 @@ public class PedidosController(PedidosClientService pedidos, IConfiguration conf
             if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
                 return RedirectToAction("Salir", "Auth");
             
-            // Si el backend devuelve 422 por transición inválida
             TempData["ErrorMessage"] = "No se pudo actualizar el estado. Verifica que la transición sea válida.";
             return RedirectToAction(nameof(Detalle), new { id });
         }

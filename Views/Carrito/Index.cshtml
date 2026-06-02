@@ -7,7 +7,8 @@
 
 @if (Model == null || Model.Productos == null || !Model.Productos.Any())
 {
-    <div class="alert alert-info">Tu carrito está vacío. <a asp-controller="Comprar" asp-action="Index">Sigue comprando</a>.</div>
+    <div class="alert alert-info">Tu carrito está vacío. <a asp-controller="Comprar" asp-action="Index">Sigue comprando</a>.
+    </div>
 }
 else
 {
@@ -20,6 +21,7 @@ else
                         <th>Precio</th>
                         <th>Cantidad</th>
                         <th>Subtotal</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -32,20 +34,34 @@ else
                             <td>$@item.Producto?.Precio</td>
                             <td>@item.Cantidad</td>
                             <td>$@(item.Cantidad * item.Producto?.Precio)</td>
+                            <td class="text-end">
+                                <form asp-action="Eliminar" method="post">
+                                    <input type="hidden" name="productoId" value="@item.Producto?.ProductoId" />
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Quitar del carrito">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
                         </tr>
                     }
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="3" class="text-end fw-bold">Total:</td>
-                        <td class="fw-bold fs-5">$@(Model.Productos.Sum(p => p.Cantidad * p.Producto?.Precio))</td>
+                        <td colspan="4" class="text-end fw-bold">Total:</td>
+                        <td class="fw-bold fs-5 text-end">$@(Model.Productos.Sum(p => p.Cantidad * p.Producto?.Precio))</td>
                     </tr>
                 </tfoot>
             </table>
-            
-            <div class="d-flex justify-content-end mt-3">
-                <a asp-controller="Comprar" class="btn btn-outline-secondary me-2">Seguir comprando</a>
-                <a href="#" class="btn btn-success">Ir a Pagar</a>
+
+            <div class="d-flex justify-content-end mt-3 align-items-center">
+                <a asp-controller="Comprar" class="btn btn-outline-secondary me-3">Seguir comprando</a>
+                
+                <form asp-action="Pagar" method="post" class="m-0">
+                    <input type="hidden" name="carritoId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-success fw-bold px-4 py-2 shadow-sm">
+                        <i class="bi bi-credit-card me-2"></i> Confirmar Pedido
+                    </button>
+                </form>
             </div>
         </div>
     </div>

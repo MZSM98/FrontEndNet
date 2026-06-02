@@ -1,24 +1,32 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace frontendnet.Models;
 
 public class Pedido
 {
     [Display(Name = "Id")]
+    [JsonPropertyName("id")]
     public int Id { get; set; }
 
     [Display(Name = "Total")]
     [DisplayFormat(DataFormatString = "{0:C}")]
-    public decimal Total { get; set; }
+    [JsonPropertyName("total")]
+    
+    public string? Total { get; set; } 
 
     [Display(Name = "Estado")]
-    public string Estado { get; set; } = "pendiente";
+    [JsonPropertyName("estado")]
+    public string? Estado { get; set; }
 
     [Display(Name = "Fecha de Creación")]
-    public DateTime CreatedAt { get; set; }
+    [JsonPropertyName("createdAt")]
+    public DateTime? CreatedAt { get; set; }
 
     [Display(Name = "Última Actualización")]
-    public DateTime UpdatedAt { get; set; }
+    [JsonPropertyName("updatedAt")]
+    public DateTime? UpdatedAt { get; set; }
 
+    [JsonPropertyName("cliente")]
     public Usuario? Cliente { get; set; } 
 }

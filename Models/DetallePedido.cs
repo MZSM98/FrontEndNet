@@ -1,36 +1,40 @@
-using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace frontendnet.Models;
 
 public class DetallePedido
 {
+    [JsonPropertyName("pedidoId")]
     public int PedidoId { get; set; }
-    
-    public List<ProductoPedido> Productos { get; set; } = [];
 
-    [DisplayFormat(DataFormatString = "{0:C}")]
-    public decimal Total { get; set; }
+    [JsonPropertyName("total")]
+    public string? Total { get; set; }
 
-    public string Estado { get; set; } = string.Empty;
+    [JsonPropertyName("estado")]
+    public string? Estado { get; set; }
 
-    public DateTime UpdatedAt { get; set; }
+    [JsonPropertyName("updatedAt")]
+    public DateTime? UpdatedAt { get; set; }
+
+    [JsonPropertyName("productos")]
+    public List<ProductoPedido>? Productos { get; set; }
 }
 
+// Agregamos esta clase aquí mismo para leer la lista de cosas compradas
 public class ProductoPedido
 {
+    [JsonPropertyName("id")]
     public int Id { get; set; }
+
+    [JsonPropertyName("titulo")]
     public string? Titulo { get; set; }
 
-    [DisplayFormat(DataFormatString = "{0:C}")]
-    public decimal PrecioVenta { get; set; }
-    
-    public int Cantidad { get; set; }
-    public int? ArchivoId { get; set; }
-}
+    [JsonPropertyName("precioVenta")]
+    public string? PrecioVenta { get; set; }
 
-// Para usar en el PATCH del estado
-public class UpdateEstadoPedido
-{
-    [Required]
-    public string Estado { get; set; } = string.Empty;
+    [JsonPropertyName("cantidad")]
+    public int Cantidad { get; set; }
+
+    [JsonPropertyName("archivoId")]
+    public int? ArchivoId { get; set; }
 }

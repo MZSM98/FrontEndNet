@@ -95,9 +95,9 @@ public class AuthController(AuthClientService auth) : Controller
                 // 3. Redirige a la página principal ya autenticado
                 return RedirectToAction("Index", "Home");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                ModelState.AddModelError("Email", $"Error del servidor: {ex.Message}");
+                ModelState.AddModelError("Email","No se puede registrar por el momento, intente más tarde...");
             }
         }
         return View("Registrar", model);

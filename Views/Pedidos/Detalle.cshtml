@@ -1,119 +1,83 @@
-@model frontendnet.Models.DetallePedido
-
+@model DetallePedido
 @{
-    ViewData["Title"] = "Detalle del Pedido #" + Model.PedidoId;
-    bool soloAdmin = ViewBag.SoloAdmin ?? false;
+    ViewData["Title"] = "Detalle del Pedido";
+    bool esAdmin = ViewBag.SoloAdmin == true;
 }
 
-<div class="container my-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>@ViewData["Title"]</h2>
-        <a asp-action="Index" class="btn btn-secondary">Volver a la lista</a>
+<div class="mb-3">
+    <a asp-action="Index" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Volver a pedidos</a>
+</div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger shadow-sm">@TempData["ErrorMessage"]</div>
+}
+
+<div class="row">
+    <div class="col-md-@(esAdmin ? "8" : "12")">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Pedido #@Model.PedidoId</h5>
+                <span class="badge text-bg-secondary text-uppercase fs-6">@Model.Estado</span>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    @if (Model.Productos != null)
+                    {
+                        foreach (var prod in Model.Productos)
+                        {
+                            <li class="list-group-item d-flex align-items-center p-3">
+                                <img src="@((prod.ArchivoId == null) ? "https://dummyimage.com/100x100/cccccc/000000.png&text=Articulo" : Url.Action("Imagen", "Archivos", new { id = prod.ArchivoId }))"
+                                     class="rounded me-3 shadow-sm" style="width: 60px; height: 80px; object-fit: cover;">
+                                     
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 fw-bold">@prod.Titulo</h6>
+                                    <small class="text-muted">Cantidad: @prod.Cantidad</small>
+                                </div>
+                                <div class="text-end fw-bold">
+                                    $@prod.PrecioVenta <br />
+                                    <small class="text-muted fw-normal">Subtotal: $@(prod.Cantidad * Convert.ToDecimal(prod.PrecioVenta ?? "0"))</small>
+                                </div>
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
+            <div class="card-footer text-end bg-white p-3">
+                <h4 class="mb-0">Total pagado: <span class="text-success">$@Model.Total</span></h4>
+            </div>
+        </div>
     </div>
 
-    @if (TempData["ErrorMessage"] != null)
+    @if (esAdmin)
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            @TempData["ErrorMessage"]
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
-
-    <div class="row g-4">
         <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-dark text-white">
-                    <h5 class="card-title mb-0">Resumen del Pedido</h5>
+            <div class="card shadow-sm border-primary">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-gear-fill"></i> Panel de Control
                 </div>
                 <div class="card-body">
-                    <p>
-                        <strong>Estado:</strong> 
-                        <span class="badge @(Model.Estado == "entregado" ? "bg-success" : 
-                                             Model.Estado == "cancelado" ? "bg-danger" : 
-                                             Model.Estado == "pendiente" ? "bg-warning text-dark" : "bg-info")">
-                            @Model.Estado
-                        </span>
-                    </p>
-                    <p><strong>Total del Pedido:</strong> <span class="text-success fw-bold fs-5">@Html.DisplayFor(model => model.Total)</span></p>
-                    <p class="text-muted small"><strong>Última modificación:</strong> @Model.UpdatedAt.ToString("g")</p>
-
-                    @if (soloAdmin && Model.Estado != "entregado" && Model.Estado != "cancelado")
-                    {
-                        <hr />
-                        <h6 class="fw-bold mb-2">Acciones Administrativas</h6>
-                        <form asp-action="ActualizarEstado" asp-route-id="@Model.PedidoId" method="post">
-                            <div class="mb-3">
-                                <label class="form-label small text-muted">Avanzar al siguiente estado:</label>
-                                <select name="nuevoEstado" class="form-select form-select-sm" required>
-                                    <option value="">Seleccione una opción...</option>
-                                    @if (Model.Estado == "pendiente")
-                                    {
-                                        <option value="aprobado">Aprobar Pedido</option>
-                                    }
-                                    @if (Model.Estado == "aprobado")
-                                    {
-                                        <option value="enviado">Marcar como Enviado</option>
-                                    }
-                                    @if (Model.Estado == "enviado")
-                                    {
-                                        <option value="entregado">Marcar como Entregado</option>
-                                    }
-                                    <option value="cancelado">Cancelar Pedido</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-sm btn-dark w-100">Aplicar Transición</button>
-                        </form>
-                    }
+                    <p class="small text-muted">Actualizar el estado del pedido. Las transiciones deben seguir el orden lógico.</p>
+                    
+                    <form asp-action="ActualizarEstado" method="post">
+                        <input type="hidden" name="id" value="@Model.PedidoId" />
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Cambiar estado a:</label>
+                            <select name="nuevoEstado" class="form-select">
+                                <option value="pendiente" selected="@(Model.Estado == "pendiente")">Pendiente</option>
+                                <option value="aprobado" selected="@(Model.Estado == "aprobado")">Aprobado</option>
+                                <option value="enviado" selected="@(Model.Estado == "enviado")">Enviado</option>
+                                <option value="entregado" selected="@(Model.Estado == "entregado")">Entregado</option>
+                                <option value="cancelado" selected="@(Model.Estado == "cancelado")">Cancelado</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold">Aplicar Cambios</button>
+                    </form>
+                    
+                    <hr />
+                    <p class="small text-muted mb-0">Última actualización: <br/> @(Model.UpdatedAt?.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</p>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-light">
-                    <h5 class="card-title mb-0">Artículos del Pedido</h5>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th style="width: 90px;" class="text-center">Portada</th>
-                                    <th>Producto</th>
-                                    <th class="text-end">Precio</th>
-                                    <th class="text-center">Cantidad</th>
-                                    <th class="text-end">Subtotal</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var producto in Model.Productos)
-                                {
-                                    decimal subtotal = producto.PrecioVenta * producto.Cantidad;
-                                    <tr>
-                                        <td class="text-center">
-                                            @if (producto.ArchivoId.HasValue)
-                                            {
-                                                <img src="@ViewBag.Url/api/archivos/@producto.ArchivoId" class="img-thumbnail" style="max-height: 55px; max-width: 55px; object-fit: cover;" alt="Portada" />
-                                            }
-                                            else
-                                            {
-                                                <span class="text-muted style="font-size: 0.75rem;">N/A</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            <span class="fw-bold d-block">@producto.Titulo</span>
-                                            <small class="text-muted">Código: @producto.Id</small>
-                                        </td>
-                                        <td class="text-end">@producto.PrecioVenta.ToString("C")</td>
-                                        <td class="text-center">@producto.Cantidad</td>
-                                        <td class="text-end fw-bold">@subtotal.ToString("C")</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    }
 </div>

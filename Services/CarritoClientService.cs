@@ -8,7 +8,7 @@ public class CarritoClientService(HttpClient client)
     {
         try
         {
-            return await client.GetFromJsonAsync<Carrito>("api/carrito");
+            return await client.GetFromJsonAsync<Carrito>("api/carritos");
         }
         catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
@@ -19,7 +19,7 @@ public class CarritoClientService(HttpClient client)
 
     public async Task<Carrito?> CrearAsync()
     {
-        var response = await client.PostAsync("api/carrito", null);
+        var response = await client.PostAsync("api/carritos", null);
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<Carrito>();
     }
@@ -27,7 +27,21 @@ public class CarritoClientService(HttpClient client)
     public async Task AgregarProductoAsync(int carritoId, int productoId, int cantidad)
     {
         // En Node.js el body espera { cantidad: X }
-        var response = await client.PutAsJsonAsync($"api/carrito/{carritoId}/producto/{productoId}", new { cantidad });
+        var response = await client.PutAsJsonAsync($"api/carritos/{carritoId}/producto/{productoId}", new { cantidad });
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task EliminarProductoAsync(int carritoId, int productoId)
+    {
+        // Llama a la ruta DELETE del backend de tu compañero
+        var response = await client.DeleteAsync($"api/carritos/{carritoId}/producto/{productoId}");
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task PagarAsync(int carritoId)
+    {
+        // Llama a la ruta de checkout de Node.js
+        var response = await client.PostAsync($"api/carritos/{carritoId}/checkout", null);
         response.EnsureSuccessStatusCode();
     }
 }

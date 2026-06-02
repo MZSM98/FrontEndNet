@@ -15,11 +15,11 @@ public class CategoriasController(CategoriasClientService categorias) : Controll
         {
             lista = await categorias.GetAsync();
         }
-        catch (HttpRequestException ex)
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction("Salir", "Auth");
+            return RedirectToAction("Salir", "Auth");
         }
+        catch (Exception) { } // Carga la lista vacía si hay error
         return View(lista);
     }
 
@@ -31,11 +31,11 @@ public class CategoriasController(CategoriasClientService categorias) : Controll
             item = await categorias.GetAsync(id);
             if (item == null) return NotFound();
         }
-        catch (HttpRequestException ex)
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction("Salir", "Auth");
+            return RedirectToAction("Salir", "Auth");
         }
+        catch (Exception) { return NotFound(); }
         return View(item);
     }
 
@@ -54,14 +54,15 @@ public class CategoriasController(CategoriasClientService categorias) : Controll
                 await categorias.PostAsync(itemToCreate);
                 return RedirectToAction(nameof(Index));
             }
-            catch (HttpRequestException ex)
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
-                if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                    return RedirectToAction("Salir", "Auth");
+                return RedirectToAction("Salir", "Auth");
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError("Nombre", "No ha sido posible crear la categoría. Verifique los datos.");
             }
         }
-        
-        ModelState.AddModelError("Nombre", "No ha sido posible realizar la acción. Inténtelo nuevamente.");
         return View(itemToCreate);
     }
 
@@ -73,11 +74,11 @@ public class CategoriasController(CategoriasClientService categorias) : Controll
             itemToEdit = await categorias.GetAsync(id);
             if (itemToEdit == null) return NotFound();
         }
-        catch (HttpRequestException ex)
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction("Salir", "Auth");
+            return RedirectToAction("Salir", "Auth");
         }
+        catch (Exception) { return RedirectToAction(nameof(Index)); }
         return View(itemToEdit);
     }
 
@@ -93,14 +94,15 @@ public class CategoriasController(CategoriasClientService categorias) : Controll
                 await categorias.PutAsync(itemToEdit);
                 return RedirectToAction(nameof(Index));
             }
-            catch (HttpRequestException ex)
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
-                if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                    return RedirectToAction("Salir", "Auth");
+                return RedirectToAction("Salir", "Auth");
+            }
+            catch (Exception)
+            {
+                ModelState.AddModelError("Nombre", "No ha sido posible actualizar la categoría. Inténtelo nuevamente.");
             }
         }
-        
-        ModelState.AddModelError("Nombre", "No ha sido posible realizar la acción. Inténtelo nuevamente.");
         return View(itemToEdit);
     }
 
@@ -112,33 +114,34 @@ public class CategoriasController(CategoriasClientService categorias) : Controll
             itemToDelete = await categorias.GetAsync(id);
             if (itemToDelete == null) return NotFound();
 
+            // Aquí mostramos el error si el POST falló
             if (showError.GetValueOrDefault())
-                ViewData["ErrorMessage"] = "No ha sido posible realizar la acción. Inténtelo nuevamente.";
+                ViewData["ErrorMessage"] = "No se puede eliminar esta categoría porque tiene productos asociados o está en uso.";
         }
-        catch (HttpRequestException ex)
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
         {
-            if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                return RedirectToAction("Salir", "Auth");
+            return RedirectToAction("Salir", "Auth");
         }
+        catch (Exception) { return RedirectToAction(nameof(Index)); }
         return View(itemToDelete);
     }
 
     [HttpPost]
     public async Task<IActionResult> Eliminar(int id)
     {
-        if (ModelState.IsValid)
+        try
         {
-            try
-            {
-                await categorias.DeleteAsync(id);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (HttpRequestException ex)
-            {
-                if (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-                    return RedirectToAction("Salir", "Auth");
-            }
+            await categorias.DeleteAsync(id);
+            return RedirectToAction(nameof(Index));
         }
-        return RedirectToAction(nameof(Eliminar), new { id, showError = true });
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            return RedirectToAction("Salir", "Auth");
+        }
+        catch (Exception)
+        {
+            // Atrapamos el error de base de datos y lo mandamos de regreso a la pantalla con la alerta
+            return RedirectToAction(nameof(Eliminar), new { id, showError = true });
+        }
     }
 }

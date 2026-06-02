@@ -11,7 +11,14 @@ public class CategoriasClientService(HttpClient client)
 
     public async Task<Categoria?> GetAsync(int id)
     {
-        return await client.GetFromJsonAsync<Categoria>($"api/categorias/{id}");
+        try 
+        {
+            return await client.GetFromJsonAsync<Categoria>($"api/categorias/{id}");
+        }
+        catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return null;
+        }
     }
 
     public async Task PostAsync(Categoria categoria)

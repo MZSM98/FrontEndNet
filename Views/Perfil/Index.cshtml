@@ -1,6 +1,9 @@
 @model AuthUser
+@using System.Security.Claims
 @{
     ViewData["Title"] = "Mi Perfil";
+    // Verificamos si el usuario es Administrador
+    bool esAdmin = User.FindFirstValue(ClaimTypes.Role) == "Administrador";
 }
 
 <h2 class="text-center mb-4 mt-3">@ViewData["Title"]</h2>
@@ -18,11 +21,14 @@
             <div class="form-text text-body fs-6 mt-1">@Model.Nombre</div>
         </div>
         
-        <div class="d-grid gap-2">
-            <a asp-controller="Pedidos" asp-action="Index" class="btn btn-primary btn-lg">
-                Ver mis pedidos
-            </a>
-        </div>
+        @if (esAdmin)
+        {
+            <div class="d-grid gap-2">
+                <a asp-controller="Pedidos" asp-action="Index" class="btn btn-primary btn-lg">
+                    Ver mis pedidos
+                </a>
+            </div>
+        }
 
     </div>
 </div>
