@@ -50,7 +50,7 @@
                 productos y servicios, a precio fijo.</p>
             @if (User.Identity?.IsAuthenticated == true)
             {
-                if (User.FindFirstValue(ClaimTypes.Role) == "Usuario")
+                if (User.FindFirstValue(ClaimTypes.Role) == "Cliente" || User.FindFirstValue(ClaimTypes.Role) == "Usuario")
                 {
                     <a asp-controller="Comprar" class="btn btn-primary">Comenzar a comprar</a>
                 }

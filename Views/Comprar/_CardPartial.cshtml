@@ -2,8 +2,8 @@
 
 <div class="card h-100">
     <div class="card-header text-center bg-white pt-3">
-        <img src="@((Model.ArchivoId == null) ? "https://placehold.co/300x200/FFF/999?text=Articulo" : $"{ViewBag.Url}/api/archivos/{Model.ArchivoId}")"
-             alt="@Model.Titulo" class="img-fluid" data-url="@ViewBag.Url"
+        <img src="@((Model.ArchivoId == null) ? "https://dummyimage.com/300x200/cccccc/000000.png&text=Articulo" : Url.Action("Imagen", "Archivos", new { id = Model.ArchivoId }))"
+             alt="@Model.Titulo" class="img-fluid"
              style="max-height: 200px; width: fit-content;">
     </div>
     <div class="card-body d-flex flex-column">
@@ -19,6 +19,6 @@
         </p>
     </div>
     <div class="card-footer">
-        <a class="btn btn-primary btn-sm" href="#" role="button">Comprar</a>
+        <a class="btn btn-primary btn-sm" asp-action="Detalle" asp-route-id="@Model.ProductoId">Comprar</a>
     </div>
 </div>

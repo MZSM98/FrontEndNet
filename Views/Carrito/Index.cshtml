@@ -1,18 +1,52 @@
+@model Carrito
 @{
-    ViewData["Title"] = "Carrito de compras";
-    ViewData["SubTitle"] = "Listado";
+    ViewData["Title"] = "Mi Carrito";
 }
 
-<h2 class="text-center mb-3">@ViewData["Title"] <small class="text-muted fs-5">@ViewData["SubTitle"]</small></h2>
+<h2 class="mb-4">Tu carrito de compras</h2>
 
-<div class="row small mb-3">
-    <div class="col text-end">
-        Mostrando 0 elementos
+@if (Model == null || Model.Productos == null || !Model.Productos.Any())
+{
+    <div class="alert alert-info">Tu carrito está vacío. <a asp-controller="Comprar" asp-action="Index">Sigue comprando</a>.</div>
+}
+else
+{
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Precio</th>
+                        <th>Cantidad</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Productos)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@item.Producto?.Titulo</strong>
+                            </td>
+                            <td>$@item.Producto?.Precio</td>
+                            <td>@item.Cantidad</td>
+                            <td>$@(item.Cantidad * item.Producto?.Precio)</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end fw-bold">Total:</td>
+                        <td class="fw-bold fs-5">$@(Model.Productos.Sum(p => p.Cantidad * p.Producto?.Precio))</td>
+                    </tr>
+                </tfoot>
+            </table>
+            
+            <div class="d-flex justify-content-end mt-3">
+                <a asp-controller="Comprar" class="btn btn-outline-secondary me-2">Seguir comprando</a>
+                <a href="#" class="btn btn-success">Ir a Pagar</a>
+            </div>
+        </div>
     </div>
-</div>
-
-<div class="mt-5">
-    <div class="alert alert-warning" role="alert">
-        No se han encontrado elementos. Inténtelo de nuevo más tarde.
-    </div>
-</div>
+}

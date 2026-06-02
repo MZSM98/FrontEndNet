@@ -1,0 +1,64 @@
+@model Producto
+@{
+    ViewData["Title"] = "Comprar";
+    ViewData["SubTitle"] = "Detalle del producto";
+}
+
+<div class="container mt-4 mb-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a class="text-decoration-none" asp-action="Index">Catálogo</a></li>
+            <li class="breadcrumb-item active" aria-current="page">@Model.Titulo</li>
+        </ol>
+    </nav>
+
+    <div class="row mt-4">
+        <div class="col-md-5 text-center mb-4">
+            <img src="@((Model.ArchivoId == null) ? "https://dummyimage.com/600x400/cccccc/000000.png&text=Articulo" : Url.Action("Imagen", "Archivos", new { id = Model.ArchivoId }))"
+                 alt="@Model.Titulo" class="img-fluid rounded shadow-sm" style="max-height: 450px;">
+        </div>
+
+        <div class="col-md-7">
+            <h2 class="fw-bold">@Model.Titulo</h2>
+            <p class="text-muted small mb-2">Código de producto: @Model.ProductoId</p>
+            
+            <div class="mb-3">
+                @foreach (var cat in Model.Categorias!)
+                {
+                    <span class="badge rounded-pill text-bg-warning me-1">@cat.Nombre</span>
+                }
+            </div>
+
+            <h3 class="text-primary mt-3 fw-bold">@Html.DisplayFor(model => model.Precio)</h3>
+            <p class="text-success fw-bold small"><i class="bi bi-truck"></i> Envío gratis a todo el país</p>
+
+            <div class="mb-4 mt-4">
+                <h6 class="fw-bold">Características principales:</h6>
+                <p class="text-secondary">@Model.Descripcion</p>
+            </div>
+
+            <div class="card bg-light mt-4 border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form asp-controller="Carrito" asp-action="Agregar" method="post">
+                        <input type="hidden" name="productoId" value="@Model.ProductoId" />
+                        
+                        <div class="d-flex align-items-center mb-4">
+                            <label for="cantidad" class="me-3 fw-bold mb-0">Cantidad:</label>
+                            <select name="cantidad" id="cantidad" class="form-select w-auto fw-bold">
+                                @for (int i = 1; i <= 6; i++)
+                                {
+                                    <option value="@i">@i unidad@(i > 1 ? "es" : "")</option>
+                                }
+                            </select>
+                            <span class="ms-3 text-muted small">Disponibles</span>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 btn-lg shadow-sm fw-bold">
+                            Agregar al carrito
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
